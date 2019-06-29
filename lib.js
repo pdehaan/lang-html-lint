@@ -19,19 +19,22 @@ const htmllintOpts = {
 
 /**
  * Lint the specified file/glob of .lang files and check for HTML errors.
- * @param {Array} files An array of file paths/globs to the file(s) to run through the HTML linter.
+ * @param {Array} pathOrGlobs An array of file paths/globs to the file(s) to run through the HTML linter.
  * @returns {Array} An array of results containing the linted filename and an array of errors.
  */
-async function lintFiles(files) {
+async function lintFiles(pathOrGlobs) {
   const results = [];
-  for (const f of files) {
-    const fileArr = glob.sync(f);
-    for (const file of fileArr) {
+  for (const files of pathOrGlobs) {
+    for (const file of glob.sync(files)) {
       const errors = await lintLang(file);
       if (errors.length) {
         results.push({
           file,
-          errors
+          errors: errors.map((err, idx) => {
+            // Inject the array index into the object.
+            err.index = idx + 1;
+            return err;
+          })
         });
       }
     }
@@ -45,12 +48,15 @@ async function lintFiles(files) {
  * @returns {Array} An array of strings/lines (not including comments or empty lines).
  */
 function loadFile(file) {
-  const html = fs.readFileSync(file, "utf-8");
-  return html.split("\n").filter(
-    line =>
-      !// Ignore comments and empty lines...
-      (line.startsWith("#") || line.startsWith(";") || line.trim().length === 0)
-  );
+  const lines = fs.readFileSync(file, "utf-8").split("\n");
+  return lines.filter(line => {
+    // Ignore comments and empty lines...
+    return !(
+      line.startsWith("#") ||
+      line.startsWith(";") ||
+      line.trim().length === 0
+    );
+  });
 }
 
 /**
@@ -60,15 +66,13 @@ function loadFile(file) {
  * @returns {Array} An array of htmllint errors/warnings for the specified HTML.
  */
 async function lintLang(file, opts = htmllintOpts) {
-  const html = loadFile(file);
   let results = [];
-  for (const line of html) {
+  for (const line of loadFile(file)) {
     let res = await htmllint(line, opts);
     if (res.length) {
       res = res.map(item => {
         // Begone confusing line numbers!
         delete item.line;
-
         // Inject filename and HTML (maybe) input string into item object.
         item.file = file;
         item.html = line;
