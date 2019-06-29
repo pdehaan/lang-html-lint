@@ -1,0 +1,34 @@
+{
+  "name": "lang-html-lint",
+  "description": "HTML linter for .lang files.",
+  "version": "1.0.0",
+  "author": "Peter deHaan",
+  "bin": "cli.js",
+  "bugs": {
+    "url": "https://github.com/pdehaan/lang-html-lint/issues"
+  },
+  "dependencies": {
+    "glob": "^7.1.4",
+    "htmllint": "^0.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1"
+  },
+  "homepage": "https://github.com/pdehaan/lang-html-lint#readme",
+  "keywords": [
+    "htmllint",
+    "l10n",
+    "lang"
+  ],
+  "license": "MPL-2.0",
+  "main": "lib.js",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pdehaan/lang-html-lint.git"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run lint"
+  }
+}
